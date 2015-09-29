@@ -18,7 +18,7 @@ start_seconds = time.mktime(time.strptime(start_date, "%m/%d/%Y %H:%M:%S"))
 
 from SALPY_scheduler import *
 mgr = SAL_scheduler()
-mgr.setDebugLevel(0)
+mgr.setDebugLevel(1)
 
 mydata = scheduler_timeHandlerC()
 mgr.salTelemetryPub("scheduler_timeHandler")
