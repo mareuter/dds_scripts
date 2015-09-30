@@ -25,6 +25,7 @@ mgr.salTelemetryPub("scheduler_timeHandler")
 
 mydata.timestamp = int(start_seconds)
 
+begin_time = time.time()
 count = 0
 for i in xrange(int(round(SIM_LENGTH * DAYS_IN_YEAR))):
     end_of_night = mydata.timestamp + SECONDS_IN_NIGHT
@@ -37,7 +38,10 @@ for i in xrange(int(round(SIM_LENGTH * DAYS_IN_YEAR))):
     # Run time to next night    
     mydata.timestamp += (SECONDS_IN_FULL_DAY - SECONDS_IN_NIGHT)
 
+end_time = time.time()
+diff_time = end_time - begin_time
 print("Number of messages sent = {}".format(count))
+print("Total time: {} seconds".format(diff_time))
 mgr.salShutdown()
 
 
