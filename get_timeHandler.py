@@ -7,15 +7,15 @@ mydata = scheduler_timeHandlerC()
 
 mgr.salTelemetrySub("scheduler_timeHandler")
 
-import time
+import datetime
 
 count = 0
 try:
     while True:
         scode = mgr.getNextSample_timeHandler(mydata)
         if scode == 0 and mydata.timestamp != 0:
-            print("{}".format(time.strftime("%m/%d/%Y %H:%M:%S", time.localtime(mydata.timestamp))))
             count += 1
+            print("{}".format(datetime.datetime.fromtimestamp(mydata.timestamp).isoformat()))
 
 except KeyboardInterrupt:
     mgr.salShutdown()
