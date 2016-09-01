@@ -1,5 +1,6 @@
 from SALPY_scheduler import *
 mgr = SAL_scheduler()
+#mgr.setDebugLevel(0)
 mgr.salTelemetryPub("scheduler_observation")
 d = scheduler_observationC()
 i = 0
