@@ -143,7 +143,7 @@ for o in range(NUM_OBSERVATIONS):
         rcode = sal.getNextSample_target(topicTarget)
         if rcode == 0:
             break
-    topic.observation_start_time = topicTime.timestamp
+    topicObservation.observation_start_time = topicTime.timestamp
     topicObservation.targetId = topicTarget.targetId
     topicObservation.observationId = topicTarget.targetId
     sal.putSample_observation(topicObservation)

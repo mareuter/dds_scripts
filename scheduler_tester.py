@@ -107,9 +107,9 @@ if rcode == 0:
     counter += 1
 
 print("{} Fields transferred".format(counter))
+print("Starting observation cycle")
 
 targets_sent = 1
-
 waittime = True
 lasttimetime = time.time()
 while waittime:
