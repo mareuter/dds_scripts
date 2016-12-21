@@ -82,16 +82,16 @@ fields_from_dds = 0
 end_fields = False
 while True:
     rcode = sal.getNextSample_field(topicField)
-    if field.ID == 0:
+    if topicField.ID == 0:
         continue
-    if rcode == 0 and field.ID == -1:
+    if rcode == 0 and topicField.ID == -1:
         if end_fields:
             break
         else:
             end_fields = True
             continue
-    field_set.append((field.ID, field.fov, field.ra, field.dec,
-                      field.gl, field.gb, field.el, field.eb))
+    field_set.append((topicField.ID, topicField.fov, topicField.ra, topicField.dec,
+                      topicField.gl, topicField.gb, topicField.el, topicField.eb))
     fields_from_dds += 1
     time.sleep(0.00001)
 
