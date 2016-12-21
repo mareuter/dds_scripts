@@ -59,7 +59,7 @@ sal.salTelemetrySub("scheduler_observatoryState")
 sal.salTelemetrySub("scheduler_cloud")
 sal.salTelemetrySub("scheduler_seeing")
 sal.salTelemetrySub("scheduler_observation")
-sal.salTelemetrySub("scheduler_field")
+sal.salTelemetryPub("scheduler_field")
 sal.salTelemetryPub("scheduler_target")
 sal.salTelemetryPub("scheduler_filterSwap")
 sal.salTelemetryPub("scheduler_interestedProposal")
@@ -100,7 +100,6 @@ for i in range(5292):
     if rcode == 0:
         counter += 1
 topicField.ID = -1
-sal.putSample_field(topicField)
 rcode = sal.putSample_field(topicField)
 if rcode == 0:
     counter += 1
