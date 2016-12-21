@@ -129,6 +129,7 @@ while waittime:
             if scode == 0:
                 print("Received observation {} [{}]".format(topicObservation.observationId,
                                                             topicObservation.targetId))
+                waitobservation = False
             else:
                 to = time.time()
                 if (to - lastobstime > 10.0):
