@@ -108,4 +108,19 @@ if rcode == 0:
 
 print("{} Fields transferred".format(counter))
 
+targets_sent = 1
+
+waittime = True
+lasttimetime = time.time()
+while waittime:
+    scode = sal.getNextSample_timeHandler(topicTime)
+    if scode == 0:
+        topicTarget.targetId = targets_sent
+        sal.putSample_target(topicTarget)
+        targets_sent += 1
+    else:
+        tc = time.time()
+        if (tc - lasttimetime) > 10.0:
+            waittime = False
+
 sal.salShutdown()

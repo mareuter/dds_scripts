@@ -1,5 +1,17 @@
+from datetime import datetime
 from SALPY_scheduler import *
+import sys
 import time
+
+TIME_INCREMENT = 40
+NUM_OBSERVATIONS = 10000
+try:
+    NUM_OBSERVATIONS = sys.argv[1]
+except IndexError:
+    pass
+
+unix_start = datetime(1970, 1, 1)
+time_start = (datetime.utcnow() - unix_start).total_seconds()
 
 sal = SAL_scheduler()
 sal.setDebugLevel(0)
@@ -10,6 +22,23 @@ def send_topic(func, topic, message_success, message_failure):
         print(message_success)
     else:
         print(message_failure)
+
+def recv_topic(function, topic, message_success, message_failure, extra_message=None):
+    waitconfig = True
+    lastconfigtime = time.time()
+    while waitconfig:
+        scode = function(topic)
+        if scode == 0:
+            print(message_success)
+            if extra_message is not None:
+                print("{} = {}".format(extra_message[0], getattr(topic, extra_message[1])))
+            lastconfigtime = time.time()
+            waitconfig = False
+        else:
+            tf = time.time()
+            if (tf - lastconfigtime > 10.0):
+                print(message_failure)
+                waitconfig = False
 
 # Initialize all topics
 topic_schedulerConfig = scheduler_schedulerConfigC()
@@ -97,5 +126,28 @@ while True:
     time.sleep(0.00001)
 
 print("Retrieved {} fields".format(fields_from_dds))
+print("Starting observation cycle")
+
+topicTime.timestamp = time_start
+for o in range(NUM_OBSERVATIONS):
+    sal.putSample_timeHandler(topicTime)
+    topicObservatoryState.timestamp = topicTime.timestamp
+    sal.putSample_observatoryState(topicObservatoryState)
+    topic.timestamp = topicTime.timestamp
+    topic_cloud.cloud = 0.4
+    sal.putSample_cloud(topic_cloud)
+    topic_seeing.timestamp = topicTime.timestamp
+    topic_seeing.seeing = 0.2
+    sal.putSample_seeing(topic_seeing)
+    while True:
+        rcode = sal.getNextSample_target(topicTarget)
+        if rcode == 0:
+            break
+    topic.observation_start_time = topicTime.timestamp
+    topicObservation.targetId = topicTarget.targetId
+    topicObservation.observationId = topicTarget.targetId
+    sal.putSample_observation(topicObservation)
+
+    topicTime.timestamp += TIME_INCREMENT
 
 sal.salShutdown()
