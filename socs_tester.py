@@ -148,6 +148,6 @@ for o in range(NUM_OBSERVATIONS):
 if fields_from_dds > 5292:
     with open("field_dump_{}.txt".format(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")), 'w') as ofile:
         for field in field_set:
-            ofile.write(field.ID + os.linesep)
+            ofile.write(str(field[0]) + os.linesep)
 
 sal.salShutdown()
