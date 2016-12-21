@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from SALPY_scheduler import *
 import sys
 import time
@@ -143,5 +144,10 @@ for o in range(NUM_OBSERVATIONS):
     print("Sent observation {}".format(topicObservation.observationId))
 
     topicTime.timestamp += TIME_INCREMENT
+
+if fields_from_dds > 5292:
+    with open("field_dump_{}.txt".format(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")), 'w') as ofile:
+        for field in field_set:
+            ofile.write(field.ID + os.linesep)
 
 sal.salShutdown()
