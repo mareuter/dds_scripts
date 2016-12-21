@@ -30,8 +30,9 @@ count = 0
 for i in xrange(int(round(SIM_LENGTH * DAYS_IN_YEAR))):
     end_of_night = mydata.timestamp + SECONDS_IN_NIGHT
     while mydata.timestamp <= end_of_night:
-	mgr.putSample_timeHandler(mydata)
-        count += 1
+	rcode =	mgr.putSample_timeHandler(mydata)
+        if rcode == 0:
+            count += 1
 	mydata.timestamp += VISIT_TIME
     if mydata.timestamp > end_of_night:
 	mydata.timestamp = end_of_night
