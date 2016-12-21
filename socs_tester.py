@@ -6,7 +6,7 @@ import time
 TIME_INCREMENT = 40
 NUM_OBSERVATIONS = 10000
 try:
-    NUM_OBSERVATIONS = sys.argv[1]
+    NUM_OBSERVATIONS = int(sys.argv[1])
 except IndexError:
     pass
 
