@@ -118,7 +118,7 @@ while waittime:
         lasttimetime = time.time()
         topicTarget.targetId = targets_sent
         sal.putSample_target(topicTarget)
-        print("Sent target {}". topicTarget.targetId)
+        print("Sent target {}".format(topicTarget.targetId))
         targets_sent += 1
 
         waitobservation = True
