@@ -11,7 +11,6 @@ def send_topic(func, topic, message_success, message_failure):
     else:
         print(message_failure)
 
-
 # Initialize all topics
 topic_schedulerConfig = scheduler_schedulerConfigC()
 topic_driverConfig = scheduler_driverConfigC()

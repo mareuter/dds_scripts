@@ -87,14 +87,24 @@ recv_topic(sal.getNextSample_parkConfig, topic_parkConfig,
 recv_topic(sal.getNextSample_generalPropConfig, topic_generalPropConfig,
            "generalProp Config received", "generalProp Config timeout")
 
+print("Transferring fields")
+
 topicField.ID = -1
-sal.putSample_field(topicField)
+counter = 0
+rcode = sal.putSample_field(topicField)
+if rcode == 0:
+    counter += 1
 for i in range(5292):
     topicField.ID = i + 1
-    sal.putSample_field(topicField)
+    rcode = sal.putSample_field(topicField)
+    if rcode == 0:
+        counter += 1
 topicField.ID = -1
 sal.putSample_field(topicField)
+rcode = sal.putSample_field(topicField)
+if rcode == 0:
+    counter += 1
 
-print("Fields transferred")
+print("{} Fields transferred".format(counter))
 
 sal.salShutdown()
