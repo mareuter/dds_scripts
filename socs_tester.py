@@ -71,7 +71,9 @@ sal.putSample_parkConfig(topic_parkConfig)
 
 for i in range(4):
     topic_generalPropConfig.prop_id = i + 1
-    sal.putSample_generalPropConfig(topic_generalPropConfig)
+    rcode = sal.putSample_generalPropConfig(topic_generalPropConfig)
+    if rcode == 0:
+        print("Proposal config {} sent".format(topic_generalPropConfig.prop_id))
 
 print("Configuration sent")
 print("Retrieving fields")
