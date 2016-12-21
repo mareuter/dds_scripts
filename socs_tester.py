@@ -131,14 +131,6 @@ print("Starting observation cycle")
 topicTime.timestamp = time_start
 for o in range(NUM_OBSERVATIONS):
     sal.putSample_timeHandler(topicTime)
-    topicObservatoryState.timestamp = topicTime.timestamp
-    sal.putSample_observatoryState(topicObservatoryState)
-    topic_cloud.timestamp = topicTime.timestamp
-    topic_cloud.cloud = 0.4
-    sal.putSample_cloud(topic_cloud)
-    topic_seeing.timestamp = topicTime.timestamp
-    topic_seeing.seeing = 0.2
-    sal.putSample_seeing(topic_seeing)
     while True:
         rcode = sal.getNextSample_target(topicTarget)
         if rcode == 0:
