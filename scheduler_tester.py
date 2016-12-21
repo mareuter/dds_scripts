@@ -107,7 +107,7 @@ if rcode == 0:
     counter += 1
 
 print("{} Fields transferred".format(counter))
-print("Starting observation cycle")
+print("Starting target cycle")
 
 targets_sent = 1
 waittime = True
@@ -115,9 +115,24 @@ lasttimetime = time.time()
 while waittime:
     scode = sal.getNextSample_timeHandler(topicTime)
     if scode == 0:
+        lasttimetime = time.time()
         topicTarget.targetId = targets_sent
         sal.putSample_target(topicTarget)
+        print("Sent target {}". topicTarget.targetId)
         targets_sent += 1
+
+        waitobservation = True
+        lastobstime = time.time()
+        while waitobservation:
+            lastobstime = time.time()
+            scode = sal.getNextSample_observation(topicObservation)
+            if scode == 0:
+                print("Received observation {} [{}]".format(topicObservation.observationId,
+                                                            topicObservation.targetId))
+            else:
+                to = time.time()
+                if (to - lastobstime > 10.0):
+                    waitobservation = False
     else:
         tc = time.time()
         if (tc - lasttimetime) > 10.0:

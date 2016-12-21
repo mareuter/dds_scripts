@@ -143,10 +143,12 @@ for o in range(NUM_OBSERVATIONS):
         rcode = sal.getNextSample_target(topicTarget)
         if rcode == 0:
             break
+    print("Received target {}".format(topicTarget.targetId))
     topicObservation.observation_start_time = topicTime.timestamp
     topicObservation.targetId = topicTarget.targetId
     topicObservation.observationId = topicTarget.targetId
     sal.putSample_observation(topicObservation)
+    print("Sent observation {}".format(topicObservation.observationId))
 
     topicTime.timestamp += TIME_INCREMENT
 
