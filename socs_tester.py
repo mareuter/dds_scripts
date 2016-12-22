@@ -121,9 +121,10 @@ while True:
         else:
             end_fields = True
             continue
-    field_set.append((topicField.ID, topicField.fov, topicField.ra, topicField.dec,
-                      topicField.gl, topicField.gb, topicField.el, topicField.eb))
-    fields_from_dds += 1
+    if rcode == 0:
+        field_set.append((topicField.ID, topicField.fov, topicField.ra, topicField.dec,
+                          topicField.gl, topicField.gb, topicField.el, topicField.eb))
+        fields_from_dds += 1
 
 print("Retrieved {} fields".format(fields_from_dds))
 print("Starting observation cycle")
