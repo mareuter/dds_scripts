@@ -140,8 +140,6 @@ bad_fields_from_dds = 0
 end_fields = False
 while True:
     rcode = sal.getNextSample_field(topicField)
-    if topicField.ID == 0:
-        continue
     if rcode == 0 and topicField.ID == -1:
         if end_fields:
             break
