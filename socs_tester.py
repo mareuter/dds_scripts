@@ -1,3 +1,4 @@
+from __future__ import print_function
 from datetime import datetime
 import os
 from SALPY_scheduler import *
@@ -18,16 +19,25 @@ sal = SAL_scheduler()
 sal.setDebugLevel(0)
 
 def send_topic(func, topic, message_success, message_failure, extra_item=None):
+    fail_counter = 0
     while True:
         rcode = func(topic)
         if rcode == 0:
+            print()
+            message = []
             if "{}" in message_success:
-                print(message_success.format(getattr(topic, extra_item)))
+                message.append(message_success.format(getattr(topic, extra_item)))
             else:
-                print(message_success)
+                message.append(message_success)
+            message.append("with {} errors.".format(fail_counter))
+            print(" ".join(message))
             break
         else:
-            print(message_failure)
+            if fail_counter == 0:
+                print(message_failure)
+            elif fail_counter % 50 == 0:
+                print(".", end="")
+            fail_counter += 1
 
 def recv_topic(function, topic, message_success, message_failure, extra_message=None):
     waitconfig = True
