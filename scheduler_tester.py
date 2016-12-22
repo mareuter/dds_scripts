@@ -1,7 +1,7 @@
 from SALPY_scheduler import *
 import time
 
-def recv_topic(function, topic, message_success, message_failure, extra_message=None):
+def recv_topic(function, topic, message_success, message_failure, extra_message=None, state_change=False):
     waitconfig = True
     lastconfigtime = time.time()
     while waitconfig:
@@ -11,7 +11,7 @@ def recv_topic(function, topic, message_success, message_failure, extra_message=
             if extra_message is not None:
                 print("{} = {}".format(extra_message[0], getattr(topic, extra_message[1])))
             lastconfigtime = time.time()
-            waitconfig = False
+            waitconfig = state_change
         else:
             tf = time.time()
             if (tf - lastconfigtime > 10.0):
@@ -87,7 +87,8 @@ recv_topic(sal.getNextSample_opticsLoopCorrConfig, topic_opticsLoopCorrConfig,
 recv_topic(sal.getNextSample_parkConfig, topic_parkConfig,
            "park Config received", "park Config timeout")
 recv_topic(sal.getNextSample_generalPropConfig, topic_generalPropConfig,
-           "generalProp Config received", "generalProp Config timeout", extra_message=("Prop Id", "prop_id"))
+           "generalProp Config received", "generalProp Config timeout", extra_message=("Prop Id", "prop_id"),
+           state_change=True)
 
 print("Transferring fields")
 
