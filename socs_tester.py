@@ -23,7 +23,8 @@ def send_topic(func, topic, message_success, message_failure, extra_item=None):
     while True:
         rcode = func(topic)
         if rcode == 0:
-            print()
+            if fail_counter:
+                print()
             message = []
             if "{}" in message_success:
                 message.append(message_success.format(getattr(topic, extra_item)))
