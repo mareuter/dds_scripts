@@ -17,12 +17,17 @@ time_start = (datetime.utcnow() - unix_start).total_seconds()
 sal = SAL_scheduler()
 sal.setDebugLevel(0)
 
-def send_topic(func, topic, message_success, message_failure):
-    rcode = func(topic)
-    if rcode == 0:
-        print(message_success)
-    else:
-        print(message_failure)
+def send_topic(func, topic, message_success, message_failure, extra_item=None):
+    while True:
+        rcode = func(topic)
+        if rcode == 0:
+            if "{}" in message_success:
+                print(message_success.format(getattr(topic, extra_item)))
+            else:
+                print(message_success)
+            break
+        else:
+            print(message_failure)
 
 def recv_topic(function, topic, message_success, message_failure, extra_message=None):
     waitconfig = True
@@ -88,22 +93,32 @@ sal.salTelemetrySub("scheduler_interestedProposal")
 
 print("SOCS Ready")
 
-sal.putSample_schedulerConfig(topic_schedulerConfig)
-sal.putSample_driverConfig(topic_driverConfig)
-sal.putSample_obsSiteConfig(topic_obsSiteConfig)
-sal.putSample_telescopeConfig(topic_telescopeConfig)
-sal.putSample_domeConfig(topic_domeConfig)
-sal.putSample_rotatorConfig(topic_rotatorConfig)
-sal.putSample_cameraConfig(topic_cameraConfig)
-sal.putSample_slewConfig(topic_slewConfig)
-sal.putSample_opticsLoopCorrConfig(topic_opticsLoopCorrConfig)
-sal.putSample_parkConfig(topic_parkConfig)
+send_topic(sal.putSample_schedulerConfig, topic_schedulerConfig,
+           "scheduler Config sent", "scheduler Config publish failed")
+send_topic(sal.putSample_driverConfig, topic_driverConfig,
+           "driver Config sent", "driver Config publish failed")
+send_topic(sal.putSample_obsSiteConfig, topic_obsSiteConfig,
+           "obsSite Config sent", "obsSite Config publish failed")
+send_topic(sal.putSample_telescopeConfig, topic_telescopeConfig,
+           "telescope Config sent", "telescope Config publish failed")
+send_topic(sal.putSample_domeConfig, topic_domeConfig,
+           "dome Config sent", "dome Config publish failed")
+send_topic(sal.putSample_rotatorConfig, topic_rotatorConfig,
+           "rotator Config sent", "rotator Config publish failed")
+send_topic(sal.putSample_cameraConfig, topic_cameraConfig,
+           "camera Config sent", "camera Config publish failed")
+send_topic(sal.putSample_slewConfig, topic_slewConfig,
+           "slew Config sent", "slew Config publish failed")
+send_topic(sal.putSample_opticsLoopCorrConfig, topic_opticsLoopCorrConfig,
+           "opticsLoopCorr Config sent", "opticsLoopCorr Config publish failed")
+send_topic(sal.putSample_parkConfig, topic_parkConfig,
+           "park Config sent", "park Config publish failed")
 
 for i in range(4):
     topic_generalPropConfig.prop_id = i + 1
-    rcode = sal.putSample_generalPropConfig(topic_generalPropConfig)
-    if rcode == 0:
-        print("Proposal config {} sent".format(topic_generalPropConfig.prop_id))
+    send_topic(sal.putSample_generalPropConfig, topic_generalPropConfig,
+               "generalProp Config {} sent", "generalProp Config publish failed",
+               extra_item="prop_id")
 
 print("Configuration sent")
 print("Retrieving fields")
