@@ -124,7 +124,8 @@ print("Configuration sent")
 print("Retrieving fields")
 
 field_set = []
-fields_from_dds = 0
+good_fields_from_dds = 0
+bad_fields_from_dds = 0
 end_fields = False
 while True:
     rcode = sal.getNextSample_field(topicField)
@@ -139,9 +140,12 @@ while True:
     if rcode == 0:
         field_set.append((topicField.ID, topicField.fov, topicField.ra, topicField.dec,
                           topicField.gl, topicField.gb, topicField.el, topicField.eb))
-        fields_from_dds += 1
+        good_fields_from_dds += 1
+    else:
+        bad_fields_from_dds += 1
 
-print("Retrieved {} fields".format(fields_from_dds))
+print("Retrieved {} good fields".format(good_fields_from_dds))
+print("Retrieved {} bad fields".format(bad_fields_from_dds))
 print("Starting observation cycle")
 
 topicTime.timestamp = time_start
