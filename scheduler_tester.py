@@ -94,20 +94,28 @@ print("Transferring fields")
 
 topicField.ID = -1
 counter = 0
+bad_counter = 0
 rcode = sal.putSample_field(topicField)
 if rcode == 0:
     counter += 1
+else:
+    bad_counter += 1
 for i in range(5292):
     topicField.ID = i + 1
     rcode = sal.putSample_field(topicField)
     if rcode == 0:
         counter += 1
+    else:
+        bad_counter += 1
 topicField.ID = -1
 rcode = sal.putSample_field(topicField)
 if rcode == 0:
     counter += 1
+else:
+    bad_counter += 1
 
 print("{} Fields transferred".format(counter))
+print("{} bad Field transfer attempts".format(bad_counter))
 print("Starting target cycle")
 
 targets_sent = 1
