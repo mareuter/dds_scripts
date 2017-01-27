@@ -36,8 +36,8 @@ def send_topic(func, topic, message_success, message_failure, extra_item=None):
         else:
             if fail_counter == 0:
                 print(message_failure)
-            elif fail_counter % 50 == 0:
-                print(".", end="")
+            # elif fail_counter % 1000 == 0:
+            #     print(".", end="")
             fail_counter += 1
 
 def recv_topic(function, topic, message_success, message_failure, extra_message=None):
@@ -53,9 +53,10 @@ def recv_topic(function, topic, message_success, message_failure, extra_message=
             waitconfig = False
         else:
             tf = time.time()
-            if (tf - lastconfigtime > 10.0):
+            if (tf - lastconfigtime > 20.0):
                 print(message_failure)
                 waitconfig = False
+            time.sleep(0.1)
 
 # Initialize all topics
 topic_schedulerConfig = scheduler_schedulerConfigC()
