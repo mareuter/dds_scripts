@@ -14,9 +14,10 @@ def recv_topic(function, topic, message_success, message_failure, extra_message=
             waitconfig = state_change
         else:
             tf = time.time()
-            if (tf - lastconfigtime > 10.0):
+            if (tf - lastconfigtime > 20.0):
                 print(message_failure)
                 waitconfig = False
+            time.sleep(0.1)
 
 sal = SAL_scheduler()
 sal.setDebugLevel(0)
