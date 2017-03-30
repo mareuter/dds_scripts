@@ -153,6 +153,7 @@ while True:
         good_fields_from_dds += 1
     else:
         bad_fields_from_dds += 1
+    time.sleep(0.0001)
 
 print("Retrieved {} good fields".format(good_fields_from_dds))
 print("Retrieved {} bad fields".format(bad_fields_from_dds))
