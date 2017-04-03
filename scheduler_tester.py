@@ -14,10 +14,10 @@ def recv_topic(function, topic, message_success, message_failure, extra_message=
             waitconfig = state_change
         else:
             tf = time.time()
-            if (tf - lastconfigtime > 20.0):
+            if (tf - lastconfigtime > 200.0):
                 print(message_failure)
                 waitconfig = False
-            time.sleep(0.1)
+            time.sleep(0.001)
 
 sal = SAL_scheduler()
 sal.setDebugLevel(0)
@@ -89,7 +89,7 @@ recv_topic(sal.getNextSample_parkConfig, topic_parkConfig,
            "park Config received", "park Config timeout")
 recv_topic(sal.getNextSample_generalPropConfig, topic_generalPropConfig,
            "generalProp Config received", "generalProp Config timeout", extra_message=("Prop Id", "prop_id"),
-           state_change=True)
+           state_change=False)
 
 print("Transferring fields")
 
@@ -104,6 +104,7 @@ else:
 for i in range(5292):
     topicField.ID = i + 1
     rcode = sal.putSample_field(topicField)
+    time.sleep(0.001)
     if rcode == 0:
         counter += 1
     else:
@@ -142,11 +143,12 @@ while waittime:
                 waitobservation = False
             else:
                 to = time.time()
-                if (to - lastobstime > 10.0):
+                if (to - lastobstime > 10000.0):
                     waitobservation = False
     else:
         tc = time.time()
-        if (tc - lasttimetime) > 10.0:
+        if (tc - lasttimetime) > 100000.0:
             waittime = False
+        time.sleep(0.001)
 
 sal.salShutdown()

@@ -53,10 +53,10 @@ def recv_topic(function, topic, message_success, message_failure, extra_message=
             waitconfig = False
         else:
             tf = time.time()
-            if (tf - lastconfigtime > 20.0):
+            if (tf - lastconfigtime > 200.0):
                 print(message_failure)
                 waitconfig = False
-            time.sleep(0.1)
+            time.sleep(0.001)
 
 # Initialize all topics
 topic_schedulerConfig = scheduler_schedulerConfigC()
@@ -151,6 +151,7 @@ while True:
         field_set.append((topicField.ID, topicField.fov, topicField.ra, topicField.dec,
                           topicField.gl, topicField.gb, topicField.el, topicField.eb))
         good_fields_from_dds += 1
+        print("field ",good_fields_from_dds)
     else:
         bad_fields_from_dds += 1
     time.sleep(0.0001)
@@ -166,6 +167,7 @@ for o in range(NUM_OBSERVATIONS):
         rcode = sal.getNextSample_target(topicTarget)
         if rcode == 0:
             break
+        time.sleep(0.001)
     print("Received target {}".format(topicTarget.targetId))
     topicObservation.observation_start_time = topicTime.timestamp
     topicObservation.targetId = topicTarget.targetId
