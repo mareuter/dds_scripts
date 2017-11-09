@@ -4,8 +4,14 @@ import sqlite3
 import sys
 
 SQL = "select * from TargetHistory"
+SQL_EXPS = "select * from TargetExposures where TargetHistory_targetId={}"
 
-def target_from_row(r, salobj):
+def get_exposure_times(tid, cur):
+    query = SQL_EXPS.format(tid)
+    cur.execute(query)
+    return cur.fetchall()
+
+def target_from_row(r, exp_times, salobj):
     salobj.targetId = r[0]
     salobj.fieldId = r[2]
     salobj.groupId = r[3]
@@ -16,8 +22,8 @@ def target_from_row(r, salobj):
     salobj.dec = r[8]
     salobj.angle = r[9]
     salobj.num_exposures = r[10]
-    salobj.exposure_times[0] = 15
-    salobj.exposure_times[1] = 15
+    for i, exp_time in enumerate(exp_times):
+        salobj.exposure_times[i] = int(exp_time[3])
 
 if __name__ == "__main__":
 
@@ -46,8 +52,10 @@ if __name__ == "__main__":
 
         target = SALPY_scheduler.scheduler_targetC()
 
-        for row in cursor:
-            target_from_row(row, target)
+        rows = cursor.fetchall()
+        for row in rows:
+            exposure_times = get_exposure_times(row[0], cursor)
+            target_from_row(row, exposure_times, target)
             manager.putSample_target(target)
             response = raw_input("Target served. Press Enter for next target.")
             if response != "":
