@@ -3,6 +3,12 @@ import SALPY_scheduler
 import sqlite3
 import sys
 
+# Don't want to depend on builtins
+try:
+    rin = raw_input
+except NameError:
+    rin = input
+
 SQL = "select * from TargetHistory"
 SQL_EXPS = "select * from TargetExposures where TargetHistory_targetId={}"
 
@@ -57,7 +63,7 @@ if __name__ == "__main__":
             exposure_times = get_exposure_times(row[0], cursor)
             target_from_row(row, exposure_times, target)
             manager.putSample_target(target)
-            response = raw_input("Target served. Press Enter for next target.")
+            response = rin("Target served. Press Enter for next target.")
             if response != "":
                 raise KeyboardInterrupt
 
