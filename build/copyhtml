@@ -1,0 +1,38 @@
+#!/bin/bash
+
+usage() {
+  cat << EOD
+  Usage: $(basename "$0") [options] <CSC name>
+  This command copies SAL HTML to a given location.
+  Available options:
+    -h          this message
+    -B          Branch name.
+EOD
+}
+
+# get the options
+while getopts hB: c; do
+    case $c in
+            h) usage ; exit 0 ;;
+            B) BRANCH="$OPTARG" ;;
+            \?) usage ; exit 2 ;;
+    esac
+done
+
+shift "$((OPTIND-1))"
+
+if [[ $# -lt 1 ]]; then
+  echo "Please provide the subsystem name to build."
+  exit 64
+fi
+
+subsystem=${1}
+html_loc="${HOME}/dds/html"
+if [ -n $BRANCH ] ; then
+    # Use this branch
+    html_loc="${html_loc}/$BRANCH"
+fi
+if [ ! -d "${html_loc}" ] ; then
+	mkdir -p ${html_loc}
+fi
+cp -r html/${subsystem} ${html_loc}

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+usage() {
+  cat << EOD
+  Usage: $(basename "$0") [options] <CSC name>
+  This command copies SAL libraries to a given location.
+  Available options:
+    -h          this message
+    -B          Branch name.
+EOD
+}
+
+# get the options
+while getopts hB: c; do
+    case $c in
+            h) usage ; exit 0 ;;
+            B) BRANCH="$OPTARG" ;;
+            \?) usage ; exit 2 ;;
+    esac
+done
+
+shift "$((OPTIND-1))"
+
+if [[ $# -lt 1 ]]; then
+ echo "Please provide the subsystem name to build."
+ exit 64
+fi
+
+subsystem=${1}
+echo ${subsystem}
+# SAL git repo location
+sal_loc="${HOME}/git/lsst-ts/ts_sal"
+# Installation location for the topic libraries
+dds_lib_loc="${HOME}/dds/lib"
+if [ -n $BRANCH ] ; then
+    # Use this branch
+    install_loc="${dds_lib_loc}/$BRANCH"
+else
+	install_loc=${dds_lib_loc}
+fi
+if [ ! -d "${install_loc}" ] ; then
+	mkdir -p ${install_loc}
+fi
+echo ${install_loc}
+subsystem_loc="${sal_loc}/test/${subsystem}/cpp"
+pylib="${subsystem_loc}/src/SALPY_${subsystem}.so"
+extra_lib="${subsystem_loc}/libsacpp_${subsystem}_types.so"
+
+libs="${pylib} ${extra_lib}"
+
+for lib in $libs
+do
+  cp ${lib} ${install_loc}
+  chmod 644 ${install_loc}/$(basename ${lib})
+done

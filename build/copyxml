@@ -1,0 +1,9 @@
+#!/bin/bash
+if [[ $# -ne 1 ]]; then
+  echo "Please provide the subsystem name to build."
+  exit 64
+fi
+subsystem=${1}
+xml_repo="${HOME}/git/lsst-ts/ts_xml"
+
+cp ${xml_repo}/sal_interfaces/${subsystem}/*.* .

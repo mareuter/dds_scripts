@@ -1,0 +1,36 @@
+#!/bin/bash
+usage() {
+  cat << EOD
+  Usage: $(basename "$0") [options] <CSC name>
+  This command wraps an executable with SAL envvars.
+  Available options:
+    -h          this message
+    -B          Branch name.
+EOD
+}
+
+# get the options
+while getopts :hB: c; do
+    case $c in
+            h) usage ; exit 0 ;;
+            B) BRANCH="$OPTARG" ;;
+            \?) usage ; exit 2 ;;
+    esac
+done
+
+shift "$((OPTIND-1))"
+
+py_lib="${HOME}/dds/lib"
+if [ -n $BRANCH ] ; then
+    # Use this branch
+    py_lib="${py_lib}/$BRANCH"
+fi
+
+export LSST_DDS_DOMAIN=EIA-TESTING
+export OPENSPLICE_LOC=${HOME}/git/lsst-ts/ts_opensplice/OpenSpliceDDS/V6.4.1/HDE/x86_64.linux
+export OSPL_URI=file://${OPENSPLICE_LOC}/etc/config/ospl.xml
+export TOPIC_LIB=${py_lib}
+export LD_LIBRARY_PATH=${OPENSPLICE_LOC}/lib:${TOPIC_LIB}:${LD_LIBRARY_PATH}
+export PYTHONPATH=${TOPIC_LIB}:${PYTHONPATH}
+
+$@

@@ -1,0 +1,12 @@
+#!/bin/bash
+if [[ $# -ne 1 ]]; then
+  echo "Please provide the subsystem name to build."
+  exit 64
+fi
+cmd=salgenerator
+subsys=${1}
+
+${cmd} ${subsys} validate
+${cmd} ${subsys} html
+${cmd} ${subsys} sal cpp
+${cmd} ${subsys} sal python

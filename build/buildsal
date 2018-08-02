@@ -1,0 +1,48 @@
+#!/bin/bash
+
+usage() {
+  cat << EOD
+  Usage: $(basename "$0") [options]
+  This command builds a set of SAL libraries.
+  Available options:
+    -h          this message
+EOD
+}
+
+# get the options
+while getopts h c; do
+    case $c in
+            h) usage ; exit 0 ;;
+            \?) usage ; exit 2 ;;
+    esac
+done
+
+shift "$((OPTIND-1))"
+
+if [[ $# -ne 1 ]]; then
+  echo "Please provide the subsystem list to build."
+  exit 64
+fi
+
+subsystems=${1}
+git_loc="${HOME}/git/lsst-ts"
+sal_loc="${git_loc}/ts_sal/test"
+xml_loc="${git_loc}/ts_xml"
+cd ${xml_loc}
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+dir_branch=${current_branch/\//_}
+echo ${dir_branch}
+cd ${sal_loc}
+# Clean the directory
+rm -rf *
+git clean -fd
+git checkout .
+# Build the libraries
+for subsystem in $subsystems
+do
+  echo ${subsystem}
+  copyxml ${subsystem}
+  buildcsc ${subsystem}
+  copysallib -B ${dir_branch} ${subsystem}
+  copyhtml -B ${dir_branch} ${subsystem}
+done
