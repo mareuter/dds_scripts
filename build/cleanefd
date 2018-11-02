@@ -1,0 +1,14 @@
+#!/bin/bash
+# NOTE: This script deletes all tables. 
+# Use with caution!
+
+dt_file='drop_tables.sql'
+exec_file='drop_execution.sql'
+
+echo "select concat('DROP TABLE IF EXISTS \`', table_name, '\`;') from information_schema.tables where table_schema='EFD';" > ${dt_file}
+mysql EFD < ${dt_file} > ${exec_file}
+sed -i -e "1d" ${exec_file}
+echo "Removing all tables!"
+mysql EFD < ${exec_file}
+
+rm ${dt_file} ${exec_file}
