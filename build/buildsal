@@ -37,6 +37,12 @@ cd ${sal_loc}
 rm -rf *
 git clean -fd
 git checkout .
+# Copy ancillary files
+cp ${xml_loc}/sal_interfaces/SALGenerics.xml .
+cp ${xml_loc}/sal_interfaces/SALSubsystems.xml .
+if [[ "${subsystems}" = "all" ]]; then
+  subsystems=$(getsubsystems SALSubsystems.xml)
+fi
 # Build the libraries
 for subsystem in $subsystems
 do

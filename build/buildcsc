@@ -10,3 +10,4 @@ ${cmd} ${subsys} validate
 ${cmd} ${subsys} html
 ${cmd} ${subsys} sal cpp
 ${cmd} ${subsys} sal python
+#${cmd} ${subsys} lib
