@@ -12,17 +12,18 @@ class TestHeartbeat(scriptqueue.BaseScript):
                          descr="Test heartbeat",
                          remotes_dict={"remote": remote})
 
-    async def configure(self):
-        pass
+    async def configure(self, loop_iterations=5):
+        self.loop_iterations = int(loop_iterations)
 
     def set_metadata(self, metadata):
         pass
 
     async def run(self):
-        while True:
+        counter = 0
+        while counter < self.loop_iterations:
             data = await self.remote.evt_heartbeat.next(flush=True)
             print(f"Got a heartbeat: {data.heartbeat}")
-
+            counter += 1
 
 if __name__ == '__main__':
     TestHeartbeat.main()
