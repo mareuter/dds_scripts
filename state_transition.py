@@ -12,7 +12,7 @@ async def transition(state):
     if state == 'start':
         cmd_data.settingsToApply = 'default'
 
-    return await cmd_attr.start(cmd_data, timeout=600)
+    return await cmd_attr.start(cmd_data, timeout=60)
 
 def main(state):
     loop = asyncio.get_event_loop()
