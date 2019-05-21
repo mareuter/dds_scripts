@@ -51,6 +51,9 @@ class EventHandlerTest(pyinotify.ProcessEvent):
     def process_IN_OPEN(self, event):
         self.logger.info(f'OPEN: {event.pathname}')
 
+    def process_default(self, event):
+        self.logger.info(f'{event.maskname}: {event.pathname}')
+
 class EventHandler(pyinotify.ProcessEvent):
 
     logger = logging.getLogger(LOG_NAME)
