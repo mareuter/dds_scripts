@@ -36,6 +36,21 @@ class EventHandlerTest(pyinotify.ProcessEvent):
     def process_IN_CLOSE_NOWRITE(self, event):
         self.logger.info(f'NOWRITE: {event.pathname}')
 
+    def process_IN_ACCESS(self, event):
+        self.logger.info(f'ACCESS: {event.pathname}')
+
+    def process_IN_CREATE(self, event):
+        self.logger.info(f'CREATE: {event.pathname}')
+
+    def process_IN_ISDIR(self, event):
+        self.logger.info(f'ISDIR: {event.pathname}')
+
+    def process_IN_MODIFY(self, event):
+        self.logger.info(f'MODIFY: {event.pathname}')
+
+    def process_IN_OPEN(self, event):
+        self.logger.info(f'OPEN: {event.pathname}')
+
 class EventHandler(pyinotify.ProcessEvent):
 
     logger = logging.getLogger(LOG_NAME)
@@ -83,7 +98,8 @@ if __name__ == '__main__':
 
     setup_logger()
 
-    mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE
+    #mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE
+    mask = pyinotify.ALL_EVENTS
 
     wm = pyinotify.WatchManager()
 
