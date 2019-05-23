@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import logging
 import logging.handlers
 import os
@@ -18,6 +19,7 @@ class Watcher:
 
     def __init__(self, input_dir=None, test_mode=False):
         self.test_mode = test_mode
+        self.loop = None
         if input_dir is None:
             pass
         else:
@@ -41,23 +43,34 @@ class Watcher:
                 if line != '':
                     self.logger.info(line)
 
-    def run(self):
-        for ldir in self.dirs:
-            cfiles = set([f for f in os.listdir(ldir)
-                          if os.path.isfile(os.path.join(ldir, f)) and f.endswith(OUTPUT_FILE_EXT)])
+    async def check_for_files(self):
+        while True:
+            for ldir in self.dirs:
+                self.logger.info(f'C: {ldir}')
+                cfiles = set([f for f in os.listdir(ldir)
+                              if os.path.isfile(os.path.join(ldir, f)) and f.endswith(OUTPUT_FILE_EXT)])
 
-            ofiles = self.dir_set[ldir]
-            if ofiles is not None:
-                nfiles = ofiles.symmetric_difference(cfiles)
+                self.logger.info(f'D: {cfiles}')
+                ofiles = self.dir_set[ldir]
+                self.logger.info(f'B: {ofiles}')
+                if ofiles is not None:
+                    nfiles = ofiles.symmetric_difference(cfiles)
+                    if len(nfiles):
+                        self.dir_set[ldir] = cfiles
+                else:
+                    nfiles = cfiles
+                    self.dir_set[ldir] = nfiles
+
+                self.logger.info(f'A: {nfiles}')
                 if len(nfiles):
-                    self.dir_set[ldir] = cfiles
-            else:
-                nfiles = cfiles
-                self.dir_set[ldir] = nfiles
+                    self.process(ldir, nfiles)
+            await asyncio.sleep(10)
 
-            self.logger.info(f'A: {nfiles}')
-            if len(nfiles):
-                self.process(ldir, nfiles)
+    def run(self):
+        self.loop = asyncio.get_event_loop()
+        self.loop.create_task(self.check_for_files())
+        self.loop.run_forever()
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -86,6 +99,7 @@ if __name__ == '__main__':
     setup_logger()
 
     watcher = Watcher(args.dir, args.test)
-    while True:
-        watcher.run()
-        time.sleep(10)
+    watcher.run()
+    # while True:
+    #     watcher.run()
+    #     time.sleep(10)
