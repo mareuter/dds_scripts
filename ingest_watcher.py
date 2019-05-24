@@ -1,16 +1,18 @@
 import argparse
 import asyncio
+from datetime import datetime
 import logging
 import logging.handlers
 import os
 import subprocess
-import time
 
 LOG_NAME = "ingest_watcher"
 LOG_FILE_SIZE = 1000000  # 1 MB
 LOG_FILES_TO_KEEP = 10
 
 OUTPUT_FILE_EXT = ".fits"
+DATE_DIR_FORMAT = "%Y%m%d"
+MAX_DIR_COUNT = 3
 
 
 class Watcher:
@@ -25,9 +27,31 @@ class Watcher:
         else:
             self.dirs = [input_dir]
 
+        self.date_dirs = []
         self.dir_set = {}
-        for idir in self.dirs:
-            self.dir_set[idir] = None
+        self.does_date_dir_exist()
+        # for idir in self.dirs:
+        #     self.dir_set[idir] = None
+
+    def _get_date_str(self):
+        return datetime.utcnow().strftime(DATE_DIR_FORMAT)
+
+    def does_date_dir_exist(self):
+        date_dir = self._get_date_str()
+        self.logger.info(f'H: {date_dir}')
+        for ldir in self.dirs:
+            full_path = os.path.join(ldir, date_dir)
+            if os.path.exists(full_path) and full_path not in self.dir_set:
+                self.dir_set[full_path] = None
+                if date_dir not in self.date_dirs:
+                    self.date_dirs.append(date_dir)
+                    self.logger.info(f'K: {self.date_dirs}')
+        self.prune_date_dirs()
+
+    async def check_for_date_dir(self):
+        while True:
+            self.does_date_dir_exist()
+            await asyncio.sleep(30)
 
     def process(self, input_dir, new_files):
         cmds_to_run = []
@@ -43,9 +67,19 @@ class Watcher:
                 if line != '':
                     self.logger.info(line)
 
+    def prune_date_dirs(self):
+        if len(self.date_dirs) > MAX_DIR_COUNT:
+            old_dir = self.date_dirs.pop(0)
+            self.prune_dir_set(old_dir)
+
+    def prune_dir_set(self, old_date_dir):
+        ddirs = [f for f in self.dir_set if old_date_dir in f]
+        for ddir in ddirs:
+            del self.dir_set[ddir]
+
     async def check_for_files(self):
         while True:
-            for ldir in self.dirs:
+            for ldir in self.dir_set:
                 self.logger.info(f'C: {ldir}')
                 cfiles = set([f for f in os.listdir(ldir)
                               if os.path.isfile(os.path.join(ldir, f)) and f.endswith(OUTPUT_FILE_EXT)])
@@ -69,6 +103,7 @@ class Watcher:
     def run(self):
         self.loop = asyncio.get_event_loop()
         self.loop.create_task(self.check_for_files())
+        self.loop.create_task(self.check_for_date_dir())
         self.loop.run_forever()
 
 
