@@ -30,11 +30,37 @@ class Watcher:
         self.date_dirs = []
         self.dir_set = {}
         self.does_date_dir_exist()
-        # for idir in self.dirs:
-        #     self.dir_set[idir] = None
 
     def _get_date_str(self):
         return datetime.utcnow().strftime(DATE_DIR_FORMAT)
+
+    async def check_for_date_dir(self):
+        while True:
+            self.does_date_dir_exist()
+            await asyncio.sleep(30)
+
+    async def check_for_files(self):
+        while True:
+            for ldir in self.dir_set:
+                self.logger.info(f'C: {ldir}')
+                cfiles = set([f for f in os.listdir(ldir)
+                              if os.path.isfile(os.path.join(ldir, f)) and f.endswith(OUTPUT_FILE_EXT)])
+
+                self.logger.info(f'D: {cfiles}')
+                ofiles = self.dir_set[ldir]
+                self.logger.info(f'B: {ofiles}')
+                if ofiles is not None:
+                    nfiles = ofiles.symmetric_difference(cfiles)
+                    if len(nfiles):
+                        self.dir_set[ldir] = cfiles
+                else:
+                    nfiles = cfiles
+                    self.dir_set[ldir] = nfiles
+
+                self.logger.info(f'A: {nfiles}')
+                if len(nfiles):
+                    self.process(ldir, nfiles)
+            await asyncio.sleep(10)
 
     def does_date_dir_exist(self):
         date_dir = self._get_date_str()
@@ -47,11 +73,6 @@ class Watcher:
                     self.date_dirs.append(date_dir)
                     self.logger.info(f'K: {self.date_dirs}')
         self.prune_date_dirs()
-
-    async def check_for_date_dir(self):
-        while True:
-            self.does_date_dir_exist()
-            await asyncio.sleep(30)
 
     def process(self, input_dir, new_files):
         cmds_to_run = []
@@ -76,29 +97,6 @@ class Watcher:
         ddirs = [f for f in self.dir_set if old_date_dir in f]
         for ddir in ddirs:
             del self.dir_set[ddir]
-
-    async def check_for_files(self):
-        while True:
-            for ldir in self.dir_set:
-                self.logger.info(f'C: {ldir}')
-                cfiles = set([f for f in os.listdir(ldir)
-                              if os.path.isfile(os.path.join(ldir, f)) and f.endswith(OUTPUT_FILE_EXT)])
-
-                self.logger.info(f'D: {cfiles}')
-                ofiles = self.dir_set[ldir]
-                self.logger.info(f'B: {ofiles}')
-                if ofiles is not None:
-                    nfiles = ofiles.symmetric_difference(cfiles)
-                    if len(nfiles):
-                        self.dir_set[ldir] = cfiles
-                else:
-                    nfiles = cfiles
-                    self.dir_set[ldir] = nfiles
-
-                self.logger.info(f'A: {nfiles}')
-                if len(nfiles):
-                    self.process(ldir, nfiles)
-            await asyncio.sleep(10)
 
     def run(self):
         self.loop = asyncio.get_event_loop()
@@ -135,6 +133,3 @@ if __name__ == '__main__':
 
     watcher = Watcher(args.dir, args.test)
     watcher.run()
-    # while True:
-    #     watcher.run()
-    #     time.sleep(10)
