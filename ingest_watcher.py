@@ -14,6 +14,14 @@ OUTPUT_FILE_EXT = ".fits"
 DATE_DIR_FORMAT = "%Y%m%d"
 MAX_DIR_COUNT = 3
 
+ACCS_IMAGE_DIR = '/mnt/data/ats/mcm'
+ATA_IMAGE_DIR = '/mnt/dmcs'
+
+ACCS_INGEST_DIR = '/home/lsst/ingest/accs'
+ATA_INGEST_DIR = '/home/lsst/ingest/dmcs'
+
+INGEST_CMD = 'ingestImages.py'
+
 
 class Watcher:
 
@@ -23,7 +31,7 @@ class Watcher:
         self.test_mode = test_mode
         self.loop = None
         if input_dir is None:
-            pass
+            self.dirs = [ACCS_IMAGE_DIR, ATA_IMAGE_DIR]
         else:
             self.dirs = [input_dir]
 
@@ -79,6 +87,15 @@ class Watcher:
         if self.test_mode:
             for new_file in new_files:
                 cmds_to_run.append(['python', 'process_file.py', os.path.join(input_dir, new_file)])
+        else:
+            for new_file in new_files:
+                cmd = [INGEST_CMD]
+                if ACCS_IMAGE_DIR in input_dir:
+                    cmd.append(ACCS_INGEST_DIR)
+                if ATA_IMAGE_DIR in input_dir:
+                    cmd.append(ATA_IMAGE_DIR)
+                cmd.append(new_file)
+                cmds_to_run.append(cmd)
 
         for cmd_to_run in cmds_to_run:
             self.logger.info(f'G: {" ".join(cmd_to_run)}')
