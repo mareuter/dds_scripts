@@ -50,13 +50,13 @@ class Watcher:
     async def check_for_files(self):
         while True:
             for ldir in self.dir_set:
-                self.logger.info(f'C: {ldir}')
+                self.logger.debug(f'Checking: {ldir}')
                 cfiles = set([f for f in os.listdir(ldir)
                               if os.path.isfile(os.path.join(ldir, f)) and f.endswith(OUTPUT_FILE_EXT)])
 
-                self.logger.info(f'D: {cfiles}')
+                self.logger.debug(f'Current files: {cfiles}')
                 ofiles = self.dir_set[ldir]
-                self.logger.info(f'B: {ofiles}')
+                self.logger.debug(f'Tracked files: {ofiles}')
                 if ofiles is not None:
                     nfiles = ofiles.symmetric_difference(cfiles)
                     if len(nfiles):
@@ -65,21 +65,22 @@ class Watcher:
                     nfiles = cfiles
                     self.dir_set[ldir] = nfiles
 
-                self.logger.info(f'A: {nfiles}')
+                self.logger.debug(f'New files: {nfiles}')
                 if len(nfiles):
                     self.process(ldir, nfiles)
             await asyncio.sleep(10)
 
     def does_date_dir_exist(self):
         date_dir = self._get_date_str()
-        self.logger.info(f'H: {date_dir}')
+        self.logger.debug(f'Current date: {date_dir}')
         for ldir in self.dirs:
             full_path = os.path.join(ldir, date_dir)
             if os.path.exists(full_path) and full_path not in self.dir_set:
                 self.dir_set[full_path] = None
                 if date_dir not in self.date_dirs:
                     self.date_dirs.append(date_dir)
-                    self.logger.info(f'K: {self.date_dirs}')
+                    self.logger.info(f'New date: {date_dir}')
+                    self.logger.debug(f'Tracked dates: {self.date_dirs}')
         self.prune_date_dirs()
 
     def process(self, input_dir, new_files):
@@ -98,7 +99,7 @@ class Watcher:
                 cmds_to_run.append(cmd)
 
         for cmd_to_run in cmds_to_run:
-            self.logger.info(f'G: {" ".join(cmd_to_run)}')
+            self.logger.info(f'Command: {" ".join(cmd_to_run)}')
             proc = subprocess.run(cmd_to_run, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                   text=True)
             for line in proc.stdout.split(os.linesep):
@@ -127,12 +128,18 @@ def create_parser():
     parser.add_argument('-t', '--test', action='store_true',
                         help='Run the program in test mode.')
     parser.add_argument('-d', '--dir', help='Directory to monitor. Only used in test mode.')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Print the debug log level.')
     return parser
 
-def setup_logger():
+def setup_logger(level):
     logfile = 'ingest_watcher.log'
     logger = logging.getLogger(LOG_NAME)
-    logger.setLevel(logging.INFO)
+    if level:
+        log_level = logging.DEBUG
+    else:
+        log_level = logging.INFO
+    logger.setLevel(log_level)
     formatter = logging.Formatter('%(asctime)s - %(message)s')
     rfh = logging.handlers.RotatingFileHandler(logfile, maxBytes=LOG_FILE_SIZE,
                                                backupCount=LOG_FILES_TO_KEEP)
@@ -146,7 +153,7 @@ if __name__ == '__main__':
     if args.test and args.dir is None:
         parser.error('Need to set a directory in test mode.')
 
-    setup_logger()
+    setup_logger(args.verbose)
 
     watcher = Watcher(args.dir, args.test)
     watcher.run()
