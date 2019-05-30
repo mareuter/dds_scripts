@@ -11,7 +11,8 @@ LOG_FILE_SIZE = 1000000  # 1 MB
 LOG_FILES_TO_KEEP = 10
 
 OUTPUT_FILE_EXT = ".fits"
-DATE_DIR_FORMAT = "%Y%m%d"
+ACCS_DATE_DIR_FORMAT = "%Y%m%d"
+ATA_DATE_DIR_FORMAT = "%Y-%m-%d"
 MAX_DIR_COUNT = 3
 
 ACCS_IMAGE_DIR = '/mnt/data/ats/mcm'
@@ -35,12 +36,8 @@ class Watcher:
         else:
             self.dirs = [input_dir]
 
-        self.date_dirs = []
+        self.dates = []
         self.dir_set = {}
-        self.does_date_dir_exist()
-
-    def _get_date_str(self):
-        return datetime.utcnow().strftime(DATE_DIR_FORMAT)
 
     async def check_for_date_dir(self):
         while True:
@@ -71,16 +68,21 @@ class Watcher:
             await asyncio.sleep(10)
 
     def does_date_dir_exist(self):
-        date_dir = self._get_date_str()
-        self.logger.debug(f'Current date: {date_dir}')
+        cdate = datetime.utcnow()
+        accs_date_dir = cdate.strftime(ACCS_DATE_DIR_FORMAT)
+        ata_date_dir = cdate.strftime(ATA_DATE_DIR_FORMAT)
+        date_dirs = [accs_date_dir, ata_date_dir]
+        self.logger.debug(f'Current date: {accs_date_dir}')
         for ldir in self.dirs:
-            full_path = os.path.join(ldir, date_dir)
-            if os.path.exists(full_path) and full_path not in self.dir_set:
-                self.dir_set[full_path] = None
-                if date_dir not in self.date_dirs:
-                    self.date_dirs.append(date_dir)
-                    self.logger.info(f'New date: {date_dir}')
-                    self.logger.debug(f'Tracked dates: {self.date_dirs}')
+            for ddir in date_dirs:
+                full_path = os.path.join(ldir, ddir)
+                if os.path.exists(full_path) and full_path not in self.dir_set:
+                    self.logger.debug(f'New path: {full_path}')
+                    self.dir_set[full_path] = None
+                    if cdate.date() not in self.dates:
+                        self.dates.append(cdate.date())
+                        self.logger.info(f'New date: {accs_date_dir}')
+                        self.logger.debug(f'Tracked dates: {self.dates}')
         self.prune_date_dirs()
 
     def process(self, input_dir, new_files):
@@ -107,19 +109,22 @@ class Watcher:
                     self.logger.info(line)
 
     def prune_date_dirs(self):
-        if len(self.date_dirs) > MAX_DIR_COUNT:
-            old_dir = self.date_dirs.pop(0)
-            self.prune_dir_set(old_dir)
+        if len(self.dates) > MAX_DIR_COUNT:
+            old_date = self.dates.pop(0)
+            self.prune_dir_set(old_date)
 
-    def prune_dir_set(self, old_date_dir):
-        ddirs = [f for f in self.dir_set if old_date_dir in f]
+    def prune_dir_set(self, old_date):
+        accs_date_dir = old_date.strftime(ACCS_DATE_DIR_FORMAT)
+        ata_date_dir = old_date.strftime(ATA_DATE_DIR_FORMAT)
+        ddirs = [f for f in self.dir_set if accs_date_dir in f]
+        ddirs.extend([f for f in self.dir_set if ata_date_dir in f])
         for ddir in ddirs:
             del self.dir_set[ddir]
 
     def run(self):
         self.loop = asyncio.get_event_loop()
-        self.loop.create_task(self.check_for_files())
         self.loop.create_task(self.check_for_date_dir())
+        self.loop.create_task(self.check_for_files())
         self.loop.run_forever()
 
 
