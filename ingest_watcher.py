@@ -96,7 +96,7 @@ class Watcher:
                 if ACCS_IMAGE_DIR in input_dir:
                     cmd.append(ACCS_INGEST_DIR)
                 if ATA_IMAGE_DIR in input_dir:
-                    cmd.append(ATA_IMAGE_DIR)
+                    cmd.append(ATA_INGEST_DIR)
                 cmd.append(os.path.join(input_dir, new_file))
                 cmds_to_run.append(cmd)
 
