@@ -6,6 +6,9 @@ import logging.handlers
 import os
 import subprocess
 
+SLEEP_TIME_FOR_FILE_CHECK = 2  # seconds
+SLEEP_TIME_FOR_DATE_DIR_CHECK = 30  # seconds
+
 LOG_NAME = "ingest_watcher"
 LOG_FILE_SIZE = 1000000  # 1 MB
 LOG_FILES_TO_KEEP = 10
@@ -42,7 +45,7 @@ class Watcher:
     async def check_for_date_dir(self):
         while True:
             self.does_date_dir_exist()
-            await asyncio.sleep(30)
+            await asyncio.sleep(SLEEP_TIME_FOR_DATE_DIR_CHECK)
 
     async def check_for_files(self):
         while True:
@@ -65,7 +68,7 @@ class Watcher:
                 self.logger.debug(f'New files: {nfiles}')
                 if len(nfiles):
                     self.process(ldir, nfiles)
-            await asyncio.sleep(10)
+            await asyncio.sleep(SLEEP_TIME_FOR_FILE_CHECK)
 
     def does_date_dir_exist(self):
         cdate = datetime.utcnow()
