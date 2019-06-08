@@ -16,7 +16,7 @@ LOG_FILES_TO_KEEP = 10
 OUTPUT_FILE_EXT = ".fits"
 ACCS_DATE_DIR_FORMAT = "%Y%m%d"
 ATA_DATE_DIR_FORMAT = "%Y-%m-%d"
-MAX_DIR_COUNT = 3
+MAX_DATE_COUNT = 5
 
 ACCS_IMAGE_DIR = '/mnt/data/ats/mcm'
 ATA_IMAGE_DIR = '/mnt/dmcs'
@@ -72,20 +72,27 @@ class Watcher:
 
     def does_date_dir_exist(self):
         cdate = datetime.utcnow()
-        accs_date_dir = cdate.strftime(ACCS_DATE_DIR_FORMAT)
-        ata_date_dir = cdate.strftime(ATA_DATE_DIR_FORMAT)
-        date_dirs = [accs_date_dir, ata_date_dir]
-        self.logger.debug(f'Current date: {accs_date_dir}')
-        for ldir in self.dirs:
-            for ddir in date_dirs:
-                full_path = os.path.join(ldir, ddir)
-                if os.path.exists(full_path) and full_path not in self.dir_set:
-                    self.logger.debug(f'New path: {full_path}')
-                    self.dir_set[full_path] = None
-                    if cdate.date() not in self.dates:
-                        self.dates.append(cdate.date())
-                        self.logger.info(f'New date: {accs_date_dir}')
-                        self.logger.debug(f'Tracked dates: {self.dates}')
+
+        if not len(self.dates):
+            self.dates.append(cdate.date())
+            self.logger.info(f'Current date: {cdate.strftime(ACCS_DATE_DIR_FORMAT)}')
+
+        if cdate.date() > self.dates[-1]:
+            self.dates.append(cdate.date())
+            self.logger.info(f'Current date: {cdate.strftime(ACCS_DATE_DIR_FORMAT)}')
+            self.logger.info(f'Tracked dates: {self.dates}')
+
+        for date in self.dates:
+            accs_date_dir = date.strftime(ACCS_DATE_DIR_FORMAT)
+            ata_date_dir = date.strftime(ATA_DATE_DIR_FORMAT)
+            date_dirs = [accs_date_dir, ata_date_dir]
+            for ldir in self.dirs:
+                for ddir in date_dirs:
+                    full_path = os.path.join(ldir, ddir)
+                    if os.path.exists(full_path) and full_path not in self.dir_set:
+                        self.logger.debug(f'New path: {full_path}')
+                        self.dir_set[full_path] = None
+
         self.prune_date_dirs()
 
     def process(self, input_dir, new_files):
@@ -112,7 +119,7 @@ class Watcher:
                     self.logger.info(line)
 
     def prune_date_dirs(self):
-        if len(self.dates) > MAX_DIR_COUNT:
+        if len(self.dates) > MAX_DATE_COUNT:
             old_date = self.dates.pop(0)
             self.prune_dir_set(old_date)
 
